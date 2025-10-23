@@ -1,0 +1,37 @@
+# .NET build
+bin/
+obj/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+*.log
+
+# User-specific files
+*.userprefs
+
+# Visual Studio Code
+.vscode/
+
+# Build output
+/dist/
+/publish/
+/out/
+
+# Secrets
+appsettings.Development.json
+appsettings.*.local.json
+.env
+
