@@ -1,21 +1,13 @@
 using Modules.Identity.Core.Entities;
 using Modules.Identity.Core.Entities.Enums;
+using Modules.Identity.Core.DTOs;
 
 namespace Modules.Identity.Core.Interfaces;
 
 public interface IAuthService
 {
-    Task<(bool Success, string Message, User? User)> RegisterAsync(
-        string email,
-        string password,
-        string firstName,
-        string lastName,
-        Gender gender,
-        string roleName);
-    
-    Task<(bool Success, string Message, User? User)> LoginAsync(string email, string password);
-    
-    Task<User?> GetUserByIdAsync(string userId);
-    Task<User?> GetUserByEmailAsync(string email);
-    Task<bool> UserExistsAsync(string email);
+    Task<AuthResult> RegisterAsync(string email, string password, string firstName, string lastName, Gender gender, string roleName);
+    Task<AuthResult> LoginAsync(string email, string password);
+    Task<AuthResult> ForgotPasswordAsync(string email);
+    Task<AuthResult> ResetPasswordAsync(string email, string token, string newPassword);
 }
