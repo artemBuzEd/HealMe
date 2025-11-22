@@ -1,8 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Identity.Core", "Modules\Identity\Modules.Identity.Core\Modules.Identity.Core.csproj", "{51B6E3E4-5673-420F-AD5F-821F844312F4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealMe.API", "HealMe.API\HealMe.API.csproj", "{93956EFC-EE9D-431D-B164-24495E5D0E77}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{F21DE10C-938B-4418-ABC9-9382B146B3B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Identity", "Identity", "{7D946A2F-FC4D-4838-88F4-D620E65FD6C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Identity.Infrastructure", "Modules\Identity\Modules.Identity.Infrastructure\Modules.Identity.Infrastructure.csproj", "{BBF02354-FCB6-4D18-9887-B09EDE806457}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Identity.Api", "Modules\Identity\Modules.Identity.Api\Modules.Identity.Api.csproj", "{945B0FFD-5697-471D-82E8-924FEF876E44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +27,19 @@ Global
 		{93956EFC-EE9D-431D-B164-24495E5D0E77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93956EFC-EE9D-431D-B164-24495E5D0E77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93956EFC-EE9D-431D-B164-24495E5D0E77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBF02354-FCB6-4D18-9887-B09EDE806457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBF02354-FCB6-4D18-9887-B09EDE806457}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBF02354-FCB6-4D18-9887-B09EDE806457}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBF02354-FCB6-4D18-9887-B09EDE806457}.Release|Any CPU.Build.0 = Release|Any CPU
+		{945B0FFD-5697-471D-82E8-924FEF876E44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{945B0FFD-5697-471D-82E8-924FEF876E44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{945B0FFD-5697-471D-82E8-924FEF876E44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{945B0FFD-5697-471D-82E8-924FEF876E44}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7D946A2F-FC4D-4838-88F4-D620E65FD6C1} = {F21DE10C-938B-4418-ABC9-9382B146B3B8}
+		{BBF02354-FCB6-4D18-9887-B09EDE806457} = {7D946A2F-FC4D-4838-88F4-D620E65FD6C1}
+		{945B0FFD-5697-471D-82E8-924FEF876E44} = {7D946A2F-FC4D-4838-88F4-D620E65FD6C1}
+		{51B6E3E4-5673-420F-AD5F-821F844312F4} = {7D946A2F-FC4D-4838-88F4-D620E65FD6C1}
 	EndGlobalSection
 EndGlobal
