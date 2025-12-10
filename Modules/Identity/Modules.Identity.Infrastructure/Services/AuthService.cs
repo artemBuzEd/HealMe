@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -50,7 +51,7 @@ public class AuthService : IAuthService
 
         await _userManager.AddToRoleAsync(user, roleName);
 
-        return await GenerateJwtToken(user);
+        return await GenerateTokensAsync(user);
     }
 
     public async Task<AuthResult> LoginAsync(string email, string password)
@@ -62,7 +63,7 @@ public class AuthService : IAuthService
         if (!await _userManager.CheckPasswordAsync(user, password))
             return new AuthResult { Success = false, Message = "Invalid credentials" };
 
-        return await GenerateJwtToken(user);
+        return await GenerateTokensAsync(user);
     }
 
     public async Task<AuthResult> ForgotPasswordAsync(string email)
@@ -89,10 +90,65 @@ public class AuthService : IAuthService
         return new AuthResult { Success = true, Message = "Password reset successfully" };
     }
 
-    private async Task<AuthResult> GenerateJwtToken(User user)
+    public async Task<AuthResult> RefreshTokenAsync(TokenRequest request)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_configuration["JwtConfig:Secret"] ?? "ThisIsASecretKeyForJwtTokenGeneration123456"); // Fallback key
+        var key = Encoding.ASCII.GetBytes(_configuration["JwtConfig:Secret"] ?? "ThisIsASecretKeyForJwtTokenGeneration123456");
+
+        try
+        {
+            // Validation 1: Validate JWT token format
+            var tokenVerification = jwtTokenHandler.ValidateToken(request.Token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false, // Ignore expiry
+                ClockSkew = TimeSpan.Zero
+            }, out var validatedToken);
+
+            // Validation 2: Validate encryption algorithm
+            if (validatedToken is JwtSecurityToken jwtSecurityToken && !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return new AuthResult { Success = false, Message = "Invalid token" };
+            }
+
+            // Validation 3: Validate expiry date
+            var utcExpiryDate = long.Parse(tokenVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+            var expiryDate = DateTimeOffset.FromUnixTimeSeconds(utcExpiryDate).UtcDateTime;
+
+            if (expiryDate > DateTime.UtcNow)
+            {
+                return new AuthResult { Success = false, Message = "Token has not expired yet" };
+            }
+
+            // Validation 4: Validate existence of the token
+            var storedToken = await _userManager.FindByIdAsync(tokenVerification.Claims.FirstOrDefault(x => x.Type == "Id").Value);
+
+            if (storedToken == null || storedToken.RefreshToken != request.RefreshToken)
+            {
+                return new AuthResult { Success = false, Message = "Invalid refresh token" };
+            }
+
+            // Validation 5: Validate if used
+            if (storedToken.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                return new AuthResult { Success = false, Message = "Refresh token has expired" };
+            }
+
+            return await GenerateTokensAsync(storedToken);
+        }
+        catch (Exception ex)
+        {
+            return new AuthResult { Success = false, Message = "Server error" };
+        }
+    }
+
+    private async Task<AuthResult> GenerateTokensAsync(User user)
+    {
+        var jwtTokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_configuration["JwtConfig:Secret"] ?? "ThisIsASecretKeyForJwtTokenGeneration123456");
 
         var claims = new List<Claim>
         {
@@ -111,17 +167,24 @@ public class AuthService : IAuthService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddHours(6),
+            Expires = DateTime.UtcNow.AddMinutes(15), // Short-lived access token
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
         var token = jwtTokenHandler.CreateToken(tokenDescriptor);
         var jwtToken = jwtTokenHandler.WriteToken(token);
 
+        var refreshToken = GenerateRefreshToken();
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // Long-lived refresh token
+        await _userManager.UpdateAsync(user);
+
         return new AuthResult
         {
             Success = true,
             Token = jwtToken,
+            RefreshToken = refreshToken,
             User = new UserInfo
             {
                 Id = user.Id,
@@ -132,5 +195,13 @@ public class AuthService : IAuthService
                 Roles = userRoles
             }
         };
+    }
+
+    private static string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }
