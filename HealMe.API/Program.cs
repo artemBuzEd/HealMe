@@ -5,17 +5,22 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Modules.Doctors.Infrastructure;
 using Modules.Identity.Core.Entities;
 using Modules.Identity.Core.Interfaces;
 using Modules.Identity.Infrastructure;
 using Modules.Identity.Infrastructure.Persistence;
 using Modules.Identity.Infrastructure.Services;
+using Modules.Doctors.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-//Add Identity Module
+// Identity Module
 builder.Services.AddIdentityModule();
+
+// Doctor Module
+builder.Services.AddDoctorModule(builder.Configuration);
 
 // Fluent Validation
 builder.Services.AddFluentValidationAutoValidation();
@@ -23,7 +28,8 @@ builder.Services.AddFluentValidationClientsideAdapters();
 // Add services to the container.
 
 builder.Services.AddControllers()
-    .AddApplicationPart(typeof(Modules.Identity.Api.Controllers.AuthController).Assembly);
+    .AddApplicationPart(typeof(Modules.Identity.Api.Controllers.AuthController).Assembly)
+    .AddApplicationPart(typeof(Modules.Doctors.Api.Controllers.DoctorsController).Assembly);
 
 // Database
 builder.Services.AddDbContext<IdentityDbContext>(options =>
@@ -113,8 +119,11 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
-    dbContext.Database.EnsureCreated();
+    var identityContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+    identityContext.Database.EnsureCreated();
+
+    var doctorsContext = scope.ServiceProvider.GetRequiredService<DoctorsDbContext>();
+    doctorsContext.Database.Migrate();
 }
 
 app.Run();

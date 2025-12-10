@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Modules.Doctors.Core.Interfaces;
 using Modules.Identity.Core.DTOs;
 using Modules.Identity.Core.Interfaces;
 
@@ -10,10 +11,12 @@ namespace Modules.Identity.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IDoctorService _doctorService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IDoctorService doctorService)
     {
         _authService = authService;
+        _doctorService = doctorService;
     }
 
     [HttpPost("register")]
@@ -30,6 +33,11 @@ public class AuthController : ControllerBase
 
         if (!result.Success)
             return BadRequest(result.Message);
+
+        if (request.IsDoctor && result.User != null)
+        {
+            await _doctorService.CreateProfileAsync(result.User.Id);
+        }
 
         return Ok(result);
     }

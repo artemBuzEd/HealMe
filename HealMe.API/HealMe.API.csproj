@@ -21,6 +21,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Modules\Identity\Modules.Identity.Api\Modules.Identity.Api.csproj" />
+      <ProjectReference Include="..\Modules\Doctors\Modules.Doctors.Api\Modules.Doctors.Api.csproj" />
     </ItemGroup>
 
 </Project>
