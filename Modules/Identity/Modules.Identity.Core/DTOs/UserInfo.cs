@@ -10,6 +10,5 @@ public class UserInfo
     public string LastName { get; set; }
     public string FullName => $"{FirstName} {LastName}";
     public Gender Gender { get; set; }
-    public IList<string> Role { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public IList<string> Roles { get; set; }
 }
