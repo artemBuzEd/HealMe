@@ -12,6 +12,8 @@ public class UpdateDoctorProfileRequest
 
     [Required]
     public string MedicalInstitutionLicense { get; set; } = string.Empty;
+    
+    public string PhoneNumber { get; set; } = string.Empty;
 
     public string? Biography { get; set; }
 }

@@ -6,7 +6,7 @@ public interface IDoctorService
 {
     Task<DoctorProfileDto?> GetProfileAsync(string userId);
     Task<DoctorProfileDto> UpdateProfileAsync(string userId, UpdateDoctorProfileRequest request);
-    Task<DoctorProfileDto> CreateProfileAsync(string userId);
+    Task<DoctorProfileDto> CreateProfileAsync(string userId, string firstName, string lastName);
     Task<IEnumerable<DoctorProfileDto>> GetAllDoctorsAsync();
     Task<DoctorProfileDto?> GetDoctorByIdAsync(Guid id);
     Task<IEnumerable<DoctorAvailabilityDto>> GetAvailabilityAsync(Guid doctorId);

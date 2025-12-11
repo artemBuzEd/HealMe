@@ -33,17 +33,13 @@ public class DoctorService : IDoctorService
 
         if (profile == null)
         {
-            profile = new DoctorProfile
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId
-            };
-            await _dbContext.AddAsync(profile);
+            throw new NotFoundException(userId, "Doctor");
         }
 
         profile.SpecializationId = request.SpecializationId;
         profile.ConsultationFee = request.ConsultationFee;
         profile.MedicalInstitutionLicense = request.MedicalInstitutionLicense;
+        profile.PhoneNumber = request.PhoneNumber;
         profile.Biography = request.Biography;
 
         await _dbContext.SaveChangesAsync();
@@ -51,7 +47,7 @@ public class DoctorService : IDoctorService
         return MapToDto(profile);
     }
 
-    public async Task<DoctorProfileDto> CreateProfileAsync(string userId)
+    public async Task<DoctorProfileDto> CreateProfileAsync(string userId, string firstName, string lastName)
     {
         var profile = await _dbContext.Set<DoctorProfile>()
             .FirstOrDefaultAsync(x => x.UserId == userId);
@@ -62,6 +58,8 @@ public class DoctorService : IDoctorService
         {
             Id = Guid.NewGuid(),
             UserId = userId,
+            FirstName = firstName,
+            LastName = lastName,
             SpecializationId = string.Empty,
             ConsultationFee = 0,
             MedicalInstitutionLicense = string.Empty,
@@ -126,7 +124,7 @@ public class DoctorService : IDoctorService
 
         if (profile == null)
         {
-            throw new Exception("Doctor profile not found");
+            throw new NotFoundException(userId, "Doctor");
         }
 
         if (request.StartTime >= request.EndTime)
@@ -162,8 +160,11 @@ public class DoctorService : IDoctorService
         {
             Id = profile.Id,
             UserId = profile.UserId,
+            FirstName = profile.FirstName,
+            LastName = profile.LastName,
             SpecializationId = profile.SpecializationId,
             ConsultationFee = profile.ConsultationFee,
+            PhoneNumber = profile.PhoneNumber,
             MedicalInstitutionLicense = profile.MedicalInstitutionLicense,
             Biography = profile.Biography
         };

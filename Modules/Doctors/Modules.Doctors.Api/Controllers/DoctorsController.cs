@@ -17,7 +17,8 @@ public class DoctorsController : ControllerBase
     {
         _doctorService = doctorService;
     }
-
+    
+    [Authorize(Policy = "DoctorPolicy")]
     [HttpGet("me")]
     public async Task<IActionResult> GetMyProfile()
     {
@@ -29,7 +30,7 @@ public class DoctorsController : ControllerBase
 
         return Ok(profile);
     }
-
+    [Authorize(Policy = "DoctorPolicy")]
     [HttpPut("me")]
     public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateDoctorProfileRequest request)
     {
@@ -74,7 +75,8 @@ public class DoctorsController : ControllerBase
         var reviews = await _doctorService.GetReviewsAsync(id);
         return Ok(reviews);
     }
-
+    
+    [Authorize(Policy = "DoctorPolicy")]
     [HttpPost("me/availability")]
     public async Task<IActionResult> CreateAvailability([FromBody] CreateAvailabilityRequest request)
     {
