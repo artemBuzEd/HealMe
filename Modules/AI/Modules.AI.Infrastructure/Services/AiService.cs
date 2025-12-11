@@ -60,7 +60,7 @@ public class AiService : IAiService
         }
 
         // 2. Call External AI
-        var aiUrl = _configuration["AiService:Url"];
+        var aiUrl = _configuration["AiService"];
         if (string.IsNullOrEmpty(aiUrl)) throw new Exception("AI Service URL not configured");
 
         var externalRequest = new

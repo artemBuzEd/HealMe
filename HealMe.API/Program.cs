@@ -16,6 +16,8 @@ using Modules.Patients.Infrastructure;
 using Modules.Patients.Infrastructure.Persistence;
 using Modules.AI.Infrastructure;
 using Modules.AI.Infrastructure.Persistence;
+using Modules.Appointments.Infrastructure;
+using Modules.Appointments.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,9 @@ builder.Services.AddPatientModule(builder.Configuration);
 
 // AI Module
 builder.Services.AddAiModule(builder.Configuration);
+
+// Appointments Module
+builder.Services.AddAppointmentsModule(builder.Configuration);
 
 //CORS
 builder.Services.AddCors(options =>
@@ -55,7 +60,8 @@ builder.Services.AddControllers()
     .AddApplicationPart(typeof(Modules.Identity.Api.Controllers.AuthController).Assembly)
     .AddApplicationPart(typeof(Modules.Doctors.Api.Controllers.DoctorsController).Assembly)
     .AddApplicationPart(typeof(Modules.Patients.Api.Controllers.PatientsController).Assembly)
-    .AddApplicationPart(typeof(Modules.AI.Api.Controllers.AiController).Assembly);
+    .AddApplicationPart(typeof(Modules.AI.Api.Controllers.AiController).Assembly)
+    .AddApplicationPart(typeof(Modules.Appointments.Api.Controllers.AppointmentsController).Assembly);
 
 // Database
 builder.Services.AddDbContext<IdentityDbContext>(options =>
@@ -162,6 +168,9 @@ using (var scope = app.Services.CreateScope())
 
     var aiContext = scope.ServiceProvider.GetRequiredService<AiDbContext>();
     aiContext.Database.Migrate();
+
+    var appointmentsContext = scope.ServiceProvider.GetRequiredService<AppointmentsDbContext>();
+    appointmentsContext.Database.Migrate();
 }
 
 app.Run();
