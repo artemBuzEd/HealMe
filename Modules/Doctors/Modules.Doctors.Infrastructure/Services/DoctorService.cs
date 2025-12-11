@@ -155,6 +155,66 @@ public class DoctorService : IDoctorService
         };
     }
 
+    public async Task<DoctorAvailabilityDto> UpdateAvailabilityAsync(string userId, Guid availabilityId, UpdateAvailabilityRequest request)
+    {
+        var profile = await _dbContext.Set<DoctorProfile>()
+            .FirstOrDefaultAsync(x => x.UserId == userId);
+
+        if (profile == null)
+        {
+            throw new NotFoundException(userId, "Doctor");
+        }
+
+        var availability = await _dbContext.Set<DoctorAvailability>()
+            .FirstOrDefaultAsync(x => x.Id == availabilityId && x.DoctorId == profile.Id);
+
+        if (availability == null)
+        {
+            throw new Exception("Availability slot not found or does not belong to this doctor");
+        }
+
+        if (request.StartTime >= request.EndTime)
+        {
+            throw new ArgumentException("Start time must be before end time");
+        }
+
+        availability.StartTime = request.StartTime;
+        availability.EndTime = request.EndTime;
+
+        await _dbContext.SaveChangesAsync();
+
+        return new DoctorAvailabilityDto
+        {
+            Id = availability.Id,
+            DoctorId = availability.DoctorId,
+            DayOfWeek = availability.DayOfWeek,
+            StartTime = availability.StartTime,
+            EndTime = availability.EndTime
+        };
+    }
+
+    public async Task DeleteAvailabilityAsync(string userId, Guid availabilityId)
+    {
+        var profile = await _dbContext.Set<DoctorProfile>()
+            .FirstOrDefaultAsync(x => x.UserId == userId);
+
+        if (profile == null)
+        {
+            throw new NotFoundException(userId, "Doctor");
+        }
+
+        var availability = await _dbContext.Set<DoctorAvailability>()
+            .FirstOrDefaultAsync(x => x.Id == availabilityId && x.DoctorId == profile.Id);
+
+        if (availability == null)
+        {
+            throw new Exception("Availability slot not found or does not belong to this doctor");
+        }
+
+        _dbContext.Remove(availability);
+        await _dbContext.SaveChangesAsync();
+    }
+
     private static DoctorProfileDto MapToDto(DoctorProfile profile)
     {
         return new DoctorProfileDto

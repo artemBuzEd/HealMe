@@ -95,4 +95,42 @@ public class DoctorsController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [Authorize(Policy = "DoctorPolicy")]
+    [HttpPut("me/availability/{id:guid}")]
+    public async Task<IActionResult> UpdateAvailability(Guid id, [FromBody] UpdateAvailabilityRequest request)
+    {
+        var userId = User.FindFirstValue("Id");
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        try
+        {
+            var availability = await _doctorService.UpdateAvailabilityAsync(userId, id, request);
+            return Ok(availability);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [Authorize(Policy = "DoctorPolicy")]
+    [HttpDelete("me/availability/{id:guid}")]
+    public async Task<IActionResult> DeleteAvailability(Guid id)
+    {
+        var userId = User.FindFirstValue("Id");
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        try
+        {
+            await _doctorService.DeleteAvailabilityAsync(userId, id);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }
