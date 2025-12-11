@@ -62,6 +62,7 @@ public class DoctorService : IDoctorService
             LastName = lastName,
             SpecializationId = string.Empty,
             ConsultationFee = 0,
+            PhoneNumber = string.Empty,
             MedicalInstitutionLicense = string.Empty,
             Biography = string.Empty
         };

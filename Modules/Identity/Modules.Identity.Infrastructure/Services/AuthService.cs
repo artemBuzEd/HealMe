@@ -104,7 +104,7 @@ public class AuthService : IAuthService
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                ValidateLifetime = false, // Ignore expiry
+                ValidateLifetime = false,
                 ClockSkew = TimeSpan.Zero
             }, out var validatedToken);
 

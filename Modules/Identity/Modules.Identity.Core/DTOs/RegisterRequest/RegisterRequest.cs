@@ -21,6 +21,6 @@ public class RegisterRequest
 
     [Required]
     public Gender Gender { get; set; }
-
+    
     public bool IsDoctor { get; set; }
 }

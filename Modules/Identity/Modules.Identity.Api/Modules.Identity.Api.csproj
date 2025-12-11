@@ -4,6 +4,7 @@
     <ProjectReference Include="..\Modules.Identity.Infrastructure\Modules.Identity.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules.Identity.Core\Modules.Identity.Core.csproj" />
     <ProjectReference Include="..\..\Doctors\Modules.Doctors.Core\Modules.Doctors.Core.csproj" />
+    <ProjectReference Include="..\..\Patients\Modules.Patients.Core\Modules.Patients.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

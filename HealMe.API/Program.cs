@@ -12,6 +12,8 @@ using Modules.Identity.Infrastructure;
 using Modules.Identity.Infrastructure.Persistence;
 using Modules.Identity.Infrastructure.Services;
 using Modules.Doctors.Infrastructure.Persistence;
+using Modules.Patients.Infrastructure;
+using Modules.Patients.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +22,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddIdentityModule();
 
 // Doctor Module
+// Doctor Module
 builder.Services.AddDoctorModule(builder.Configuration);
+
+// Patient Module
+builder.Services.AddPatientModule(builder.Configuration);
+
+//CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173", "http://localhost:3000") 
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
 
 // Fluent Validation
 builder.Services.AddFluentValidationAutoValidation();
@@ -29,7 +48,8 @@ builder.Services.AddFluentValidationClientsideAdapters();
 
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(Modules.Identity.Api.Controllers.AuthController).Assembly)
-    .AddApplicationPart(typeof(Modules.Doctors.Api.Controllers.DoctorsController).Assembly);
+    .AddApplicationPart(typeof(Modules.Doctors.Api.Controllers.DoctorsController).Assembly)
+    .AddApplicationPart(typeof(Modules.Patients.Api.Controllers.PatientsController).Assembly);
 
 // Database
 builder.Services.AddDbContext<IdentityDbContext>(options =>
@@ -101,6 +121,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Doctor Policy
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("DoctorPolicy", policy => policy.RequireRole("Doctor"));
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -124,6 +150,9 @@ using (var scope = app.Services.CreateScope())
 
     var doctorsContext = scope.ServiceProvider.GetRequiredService<DoctorsDbContext>();
     doctorsContext.Database.Migrate();
+
+    var patientsContext = scope.ServiceProvider.GetRequiredService<PatientsDbContext>();
+    patientsContext.Database.Migrate();
 }
 
 app.Run();

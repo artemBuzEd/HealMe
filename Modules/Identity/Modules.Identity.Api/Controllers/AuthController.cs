@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Modules.Doctors.Core.Interfaces;
+using Modules.Patients.Core.Interfaces;
 using Modules.Identity.Core.DTOs;
 using Modules.Identity.Core.Interfaces;
 
@@ -12,11 +13,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IDoctorService _doctorService;
+    private readonly IPatientService _patientService;
 
-    public AuthController(IAuthService authService, IDoctorService doctorService)
+    public AuthController(IAuthService authService, IDoctorService doctorService, IPatientService patientService)
     {
         _authService = authService;
         _doctorService = doctorService;
+        _patientService = patientService;
     }
 
     [HttpPost("register")]
@@ -36,7 +39,11 @@ public class AuthController : ControllerBase
 
         if (request.IsDoctor && result.User != null)
         {
-            await _doctorService.CreateProfileAsync(result.User.Id);
+            await _doctorService.CreateProfileAsync(result.User.Id, result.User.FirstName, result.User.LastName);
+        }
+        else if (result.User != null)
+        {
+            await _patientService.CreateProfileAsync(result.User.Id, result.User.FirstName, result.User.LastName, result.User.Email, result.User.Gender);
         }
 
         return Ok(result);
@@ -84,15 +91,6 @@ public class AuthController : ControllerBase
         if (!result.Success)
             return BadRequest(result.Message);
 
-        return Ok(result);
-    }
-    
-    [Authorize]
-    [HttpGet("testAuth")]
-    public async Task<IActionResult> TestAuth()
-    {
-        var result = "HERE I AM";
-        
         return Ok(result);
     }
 }
