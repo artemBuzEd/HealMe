@@ -62,7 +62,7 @@ public class PatientService : IPatientService
             LastName = lastName,
             Email = email,
             Gender = gender,
-            DateOfBirth = DateTime.MinValue, // Default value, user should update it
+            DateOfBirth = DateTime.MinValue,
             PhoneNumber = string.Empty
         };
 

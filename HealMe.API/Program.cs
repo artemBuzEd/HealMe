@@ -14,6 +14,8 @@ using Modules.Identity.Infrastructure.Services;
 using Modules.Doctors.Infrastructure.Persistence;
 using Modules.Patients.Infrastructure;
 using Modules.Patients.Infrastructure.Persistence;
+using Modules.AI.Infrastructure;
+using Modules.AI.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +29,9 @@ builder.Services.AddDoctorModule(builder.Configuration);
 
 // Patient Module
 builder.Services.AddPatientModule(builder.Configuration);
+
+// AI Module
+builder.Services.AddAiModule(builder.Configuration);
 
 //CORS
 builder.Services.AddCors(options =>
@@ -49,7 +54,8 @@ builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(Modules.Identity.Api.Controllers.AuthController).Assembly)
     .AddApplicationPart(typeof(Modules.Doctors.Api.Controllers.DoctorsController).Assembly)
-    .AddApplicationPart(typeof(Modules.Patients.Api.Controllers.PatientsController).Assembly);
+    .AddApplicationPart(typeof(Modules.Patients.Api.Controllers.PatientsController).Assembly)
+    .AddApplicationPart(typeof(Modules.AI.Api.Controllers.AiController).Assembly);
 
 // Database
 builder.Services.AddDbContext<IdentityDbContext>(options =>
@@ -140,7 +146,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseCors("AllowFrontend");
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
@@ -153,6 +159,9 @@ using (var scope = app.Services.CreateScope())
 
     var patientsContext = scope.ServiceProvider.GetRequiredService<PatientsDbContext>();
     patientsContext.Database.Migrate();
+
+    var aiContext = scope.ServiceProvider.GetRequiredService<AiDbContext>();
+    aiContext.Database.Migrate();
 }
 
 app.Run();
