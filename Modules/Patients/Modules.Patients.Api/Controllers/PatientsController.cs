@@ -17,7 +17,16 @@ public class PatientsController : ControllerBase
     {
         _patientService = patientService;
     }
+    
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetPatientById(Guid id)
+    {
+        var profile = await _patientService.GetProfileByIdAsync(id);
+        if (profile == null) return NotFound("Patient profile not found");
 
+        return Ok(profile);
+    }
+    
     [HttpGet("me")]
     public async Task<IActionResult> GetMyProfile()
     {
@@ -48,4 +57,6 @@ public class PatientsController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    
+    
 }

@@ -72,6 +72,12 @@ public class PatientService : IPatientService
         return MapToDto(profile);
     }
 
+    public async Task<PatientProfileDto?> GetProfileByIdAsync(Guid id)
+    {
+        var profile = await _dbContext.Set<PatientProfile>().FindAsync(id);
+        return profile == null ? null : MapToDto(profile);
+    }
+
     private static PatientProfileDto MapToDto(PatientProfile profile)
     {
         return new PatientProfileDto

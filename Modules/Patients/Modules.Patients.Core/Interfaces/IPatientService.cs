@@ -8,4 +8,5 @@ public interface IPatientService
     Task<PatientProfileDto?> GetProfileAsync(string userId);
     Task<PatientProfileDto> UpdateProfileAsync(string userId, UpdatePatientProfileRequest request);
     Task<PatientProfileDto> CreateProfileAsync(string userId, string firstName, string lastName, string email, Gender gender);
+    Task<PatientProfileDto?> GetProfileByIdAsync(Guid id);
 }
