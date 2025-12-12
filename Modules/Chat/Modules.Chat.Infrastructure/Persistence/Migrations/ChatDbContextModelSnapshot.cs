@@ -3,61 +3,49 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Modules.Appointments.Infrastructure.Persistence;
+using Modules.Chat.Infrastructure.Persistence;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Modules.Appointments.Infrastructure.Persistence.Migrations
+namespace Modules.Chat.Infrastructure.Persistence.Migrations
 {
-    [DbContext(typeof(AppointmentsDbContext))]
-    partial class AppointmentsDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ChatDbContext))]
+    partial class ChatDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("appointments")
+                .HasDefaultSchema("chat")
                 .HasAnnotation("ProductVersion", "8.0.21")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Modules.Appointments.Core.Entities.Appointment", b =>
+            modelBuilder.Entity("Modules.Chat.Core.Entities.ChatMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("DoctorId")
+                    b.Property<Guid>("AppointmentId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("DoctorUserId")
+                    b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("PatientId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("PatientUserId")
+                    b.Property<string>("SenderId")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Appointment", "appointments");
+                    b.ToTable("ChatMessage", "chat");
                 });
 #pragma warning restore 612, 618
         }

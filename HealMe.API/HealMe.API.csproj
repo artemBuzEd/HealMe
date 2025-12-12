@@ -28,6 +28,8 @@
       <ProjectReference Include="..\Modules\AI\Modules.AI.Api\Modules.AI.Api.csproj" />
       <ProjectReference Include="..\Modules\Appointments\Modules.Appointments.Infrastructure\Modules.Appointments.Infrastructure.csproj" />
       <ProjectReference Include="..\Modules\Appointments\Modules.Appointments.Api\Modules.Appointments.Api.csproj" />
+      <ProjectReference Include="..\Modules\Chat\Modules.Chat.Infrastructure\Modules.Chat.Infrastructure.csproj" />
+      <ProjectReference Include="..\Modules\Chat\Modules.Chat.Api\Modules.Chat.Api.csproj" />
     </ItemGroup>
 
 </Project>

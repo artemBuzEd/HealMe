@@ -37,7 +37,9 @@ public class AppointmentService : IAppointmentService
         {
             Id = Guid.NewGuid(),
             PatientId = patient.Id,
+            PatientUserId = patientUserId,
             DoctorId = request.DoctorId,
+            DoctorUserId = doctor.UserId,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             Status = AppointmentStatus.Pending,
@@ -121,6 +123,32 @@ public class AppointmentService : IAppointmentService
 
         appointment.Status = AppointmentStatus.Cancelled;
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<AppointmentDto> GetAppointmentByIdAsync(Guid appointmentId)
+    {
+        var appointment = await _dbContext.Set<Appointment>()
+            .FirstOrDefaultAsync(x => x.Id == appointmentId);
+        
+        if(appointment == null) throw new Exception("Appointment not found");
+        
+        return MapToDto(appointment);
+    }
+
+    public async Task<AppointmentAuthDto> GetAppointmentAuthDetailsAsync(Guid appointmentId)
+    {
+        var appointment = await _dbContext.Set<Appointment>()
+            .Select(x => new AppointmentAuthDto
+            {
+                Id = x.Id,
+                PatientUserId = x.PatientUserId,
+                DoctorUserId = x.DoctorUserId
+            })
+            .FirstOrDefaultAsync(x => x.Id == appointmentId);
+
+        if (appointment == null) throw new Exception("Appointment not found");
+
+        return appointment;
     }
 
     private static AppointmentDto MapToDto(Appointment appointment)

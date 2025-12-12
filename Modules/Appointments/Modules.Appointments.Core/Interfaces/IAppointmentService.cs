@@ -9,4 +9,6 @@ public interface IAppointmentService
     Task<IEnumerable<AppointmentDto>> GetDoctorAppointmentsAsync(string doctorUserId);
     Task<AppointmentDto> ConfirmAppointmentAsync(string doctorUserId, Guid appointmentId);
     Task CancelAppointmentAsync(string userId, Guid appointmentId);
+    Task<AppointmentDto> GetAppointmentByIdAsync(Guid appointmentId);
+    Task<AppointmentAuthDto> GetAppointmentAuthDetailsAsync(Guid appointmentId);
 }

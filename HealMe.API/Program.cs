@@ -18,6 +18,9 @@ using Modules.AI.Infrastructure;
 using Modules.AI.Infrastructure.Persistence;
 using Modules.Appointments.Infrastructure;
 using Modules.Appointments.Infrastructure.Persistence;
+using Modules.Chat.Infrastructure;
+using Modules.Chat.Infrastructure.Persistence;
+using Modules.Chat.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +40,10 @@ builder.Services.AddAiModule(builder.Configuration);
 
 // Appointments Module
 builder.Services.AddAppointmentsModule(builder.Configuration);
+
+// Chat Module
+builder.Services.AddChatModule(builder.Configuration);
+builder.Services.AddSignalR();
 
 //CORS
 builder.Services.AddCors(options =>
@@ -61,7 +68,8 @@ builder.Services.AddControllers()
     .AddApplicationPart(typeof(Modules.Doctors.Api.Controllers.DoctorsController).Assembly)
     .AddApplicationPart(typeof(Modules.Patients.Api.Controllers.PatientsController).Assembly)
     .AddApplicationPart(typeof(Modules.AI.Api.Controllers.AiController).Assembly)
-    .AddApplicationPart(typeof(Modules.Appointments.Api.Controllers.AppointmentsController).Assembly);
+    .AddApplicationPart(typeof(Modules.Appointments.Api.Controllers.AppointmentsController).Assembly)
+    .AddApplicationPart(typeof(Modules.Chat.Api.Controllers.ChatController).Assembly);
 
 // Database
 builder.Services.AddDbContext<IdentityDbContext>(options =>
@@ -98,6 +106,25 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         RequireExpirationTime = false,
         ValidateLifetime = true
+    };
+
+    // Configure JWT for SignalR
+    jwt.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            // If the request is for our hub...
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/hubs/chat")))
+            {
+                // Read the token out of the query string
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -171,6 +198,11 @@ using (var scope = app.Services.CreateScope())
 
     var appointmentsContext = scope.ServiceProvider.GetRequiredService<AppointmentsDbContext>();
     appointmentsContext.Database.Migrate();
+
+    var chatContext = scope.ServiceProvider.GetRequiredService<ChatDbContext>();
+    chatContext.Database.Migrate();
 }
+
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
