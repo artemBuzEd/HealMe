@@ -185,7 +185,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var identityContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
-    identityContext.Database.EnsureCreated();
+    identityContext.Database.Migrate();
 
     var doctorsContext = scope.ServiceProvider.GetRequiredService<DoctorsDbContext>();
     doctorsContext.Database.Migrate();
