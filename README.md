@@ -7,7 +7,7 @@ HealMe is a comprehensive telemedicine platform designed to connect patients wit
 *   **Back-end Dev**: Buziak Artem
 *   **Front-end**: Bestanchuk Bohdan
 *   **Mobile**: Tomashevskiy Pavlo
-*   **AI Service**: Stratiy Sviatoslav
+*   **AI Service**: Stratii Sviatoslav
 
 ## 🚀 Project Overview & Flow
 
