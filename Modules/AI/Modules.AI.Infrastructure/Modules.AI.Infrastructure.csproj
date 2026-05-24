@@ -20,10 +20,13 @@
       </PackageReference>
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+      <PackageReference Include="QuestPDF" Version="2024.12.2" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Modules.AI.Core\Modules.AI.Core.csproj" />
+      <ProjectReference Include="..\..\Patients\Modules.Patients.Core\Modules.Patients.Core.csproj" />
+      <ProjectReference Include="..\..\Doctors\Modules.Doctors.Core\Modules.Doctors.Core.csproj" />
     </ItemGroup>
 
 </Project>

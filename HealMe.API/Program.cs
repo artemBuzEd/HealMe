@@ -22,6 +22,8 @@ using Modules.Chat.Infrastructure;
 using Modules.Chat.Infrastructure.Persistence;
 using Modules.Chat.Api.Hubs;
 
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 var builder = WebApplication.CreateBuilder(args);
 
 

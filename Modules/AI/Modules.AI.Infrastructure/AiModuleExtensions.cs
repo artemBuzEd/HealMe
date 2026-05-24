@@ -16,6 +16,7 @@ public static class AiModuleExtensions
                 b => b.MigrationsAssembly("Modules.AI.Infrastructure")));
 
         services.AddHttpClient<IAiService, AiService>();
+        services.AddScoped<IAnamnesisPdfService, AnamnesisPdfService>();
 
         return services;
     }

@@ -12,10 +12,12 @@ namespace Modules.AI.Api.Controllers;
 public class AiController : ControllerBase
 {
     private readonly IAiService _aiService;
+    private readonly IAnamnesisPdfService _pdfService;
 
-    public AiController(IAiService aiService)
+    public AiController(IAiService aiService, IAnamnesisPdfService pdfService)
     {
         _aiService = aiService;
+        _pdfService = pdfService;
     }
 
     [HttpPost("chat")]
@@ -57,6 +59,42 @@ public class AiController : ControllerBase
         {
             var messages = await _aiService.GetSessionMessagesAsync(id, userId);
             return Ok(messages);
+        }
+        catch (Exception ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+
+    [HttpGet("sessions/{id:guid}/pdf/doctor")]
+    public async Task<IActionResult> DownloadDoctorPdf(Guid id)
+    {
+        var userId = User.FindFirstValue("Id");
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        try
+        {
+            var data = await _aiService.GetAnamnesisPdfDataAsync(id, userId);
+            var pdf = _pdfService.GenerateDoctorPdf(data);
+            return File(pdf, "application/pdf", $"anamnesis-report-{id}.pdf");
+        }
+        catch (Exception ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+
+    [HttpGet("sessions/{id:guid}/pdf/patient")]
+    public async Task<IActionResult> DownloadPatientPdf(Guid id)
+    {
+        var userId = User.FindFirstValue("Id");
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        try
+        {
+            var data = await _aiService.GetAnamnesisPdfDataAsync(id, userId);
+            var pdf = _pdfService.GeneratePatientPdf(data);
+            return File(pdf, "application/pdf", $"consultation-summary-{id}.pdf");
         }
         catch (Exception ex)
         {

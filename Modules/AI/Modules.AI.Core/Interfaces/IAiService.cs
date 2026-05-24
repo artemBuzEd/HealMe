@@ -7,4 +7,5 @@ public interface IAiService
     Task<AiMessageDto> SendMessageAsync(string userId, SendMessageRequest request);
     Task<IEnumerable<AiSessionDto>> GetUserSessionsAsync(string userId);
     Task<IEnumerable<AiMessageDto>> GetSessionMessagesAsync(Guid sessionId, string userId);
+    Task<AnamnesisPdfData> GetAnamnesisPdfDataAsync(Guid sessionId, string userId);
 }
