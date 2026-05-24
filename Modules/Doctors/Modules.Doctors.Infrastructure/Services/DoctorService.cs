@@ -133,6 +133,32 @@ public class DoctorService : IDoctorService
         return reviews.Select(MapReviewToDto);
     }
 
+    public async Task<PaginatedResponse<DoctorReviewDto>> GetReviewsAsync(Guid doctorId, int page, int pageSize)
+    {
+        var query = _dbContext.Set<DoctorReview>()
+            .Where(x => x.DoctorId == doctorId);
+
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var reviews = await query
+            .OrderByDescending(x => x.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PaginatedResponse<DoctorReviewDto>
+        {
+            Items = reviews.Select(MapReviewToDto),
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+            HasNextPage = page < totalPages,
+            HasPreviousPage = page > 1
+        };
+    }
+
     public async Task<DoctorReviewDto> CreateReviewAsync(Guid appointmentId, Guid doctorId, string patientId, string patientFirstName, string patientLastName, CreateReviewRequest request)
     {
         var existingReview = await _dbContext.Set<DoctorReview>()
