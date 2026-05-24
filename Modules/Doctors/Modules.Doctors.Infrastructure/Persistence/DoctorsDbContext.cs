@@ -33,6 +33,8 @@ public class DoctorsDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.DoctorId).IsRequired();
             entity.Property(e => e.PatientId).IsRequired();
+            entity.Property(e => e.AppointmentId).IsRequired();
+            entity.HasIndex(e => e.AppointmentId).IsUnique();
         });
         
         // builder.Entity<Specialization>(entity =>

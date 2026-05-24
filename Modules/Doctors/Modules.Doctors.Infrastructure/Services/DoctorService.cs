@@ -23,7 +23,11 @@ public class DoctorService : IDoctorService
 
         if (profile == null) return null;
 
-        return MapToDto(profile);
+        var reviews = await _dbContext.Set<DoctorReview>()
+            .Where(x => x.DoctorId == profile.Id)
+            .ToListAsync();
+
+        return MapToDto(profile, reviews);
     }
 
     public async Task<DoctorProfileDto> UpdateProfileAsync(string userId, UpdateDoctorProfileRequest request)
@@ -44,7 +48,11 @@ public class DoctorService : IDoctorService
 
         await _dbContext.SaveChangesAsync();
 
-        return MapToDto(profile);
+        var reviews = await _dbContext.Set<DoctorReview>()
+            .Where(x => x.DoctorId == profile.Id)
+            .ToListAsync();
+
+        return MapToDto(profile, reviews);
     }
 
     public async Task<DoctorProfileDto> CreateProfileAsync(string userId, string firstName, string lastName)
@@ -52,7 +60,7 @@ public class DoctorService : IDoctorService
         var profile = await _dbContext.Set<DoctorProfile>()
             .FirstOrDefaultAsync(x => x.UserId == userId);
 
-        if (profile != null) return MapToDto(profile);
+        if (profile != null) return MapToDto(profile, new List<DoctorReview>());
 
         profile = new DoctorProfile
         {
@@ -70,19 +78,33 @@ public class DoctorService : IDoctorService
         await _dbContext.AddAsync(profile);
         await _dbContext.SaveChangesAsync();
 
-        return MapToDto(profile);
+        return MapToDto(profile, new List<DoctorReview>());
     }
 
     public async Task<IEnumerable<DoctorProfileDto>> GetAllDoctorsAsync()
     {
         var profiles = await _dbContext.Set<DoctorProfile>().ToListAsync();
-        return profiles.Select(MapToDto);
+        var profileIds = profiles.Select(p => p.Id).ToList();
+        var reviews = await _dbContext.Set<DoctorReview>()
+            .Where(r => profileIds.Contains(r.DoctorId))
+            .ToListAsync();
+        var reviewsByDoctor = reviews.GroupBy(r => r.DoctorId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        return profiles.Select(p =>
+            MapToDto(p, reviewsByDoctor.GetValueOrDefault(p.Id, new List<DoctorReview>())));
     }
 
     public async Task<DoctorProfileDto?> GetDoctorByIdAsync(Guid id)
     {
         var profile = await _dbContext.Set<DoctorProfile>().FindAsync(id);
-        return profile == null ? null : MapToDto(profile);
+        if (profile == null) return null;
+
+        var reviews = await _dbContext.Set<DoctorReview>()
+            .Where(x => x.DoctorId == id)
+            .ToListAsync();
+
+        return MapToDto(profile, reviews);
     }
 
     public async Task<IEnumerable<DoctorAvailabilityDto>> GetAvailabilityAsync(Guid doctorId)
@@ -105,17 +127,68 @@ public class DoctorService : IDoctorService
     {
         var reviews = await _dbContext.Set<DoctorReview>()
             .Where(x => x.DoctorId == doctorId)
+            .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 
-        return reviews.Select(x => new DoctorReviewDto
+        return reviews.Select(MapReviewToDto);
+    }
+
+    public async Task<DoctorReviewDto> CreateReviewAsync(Guid appointmentId, Guid doctorId, string patientId, string patientFirstName, string patientLastName, CreateReviewRequest request)
+    {
+        var existingReview = await _dbContext.Set<DoctorReview>()
+            .FirstOrDefaultAsync(x => x.AppointmentId == appointmentId);
+
+        if (existingReview != null)
+            throw new Exception("A review has already been submitted for this appointment");
+
+        var review = new DoctorReview
         {
-            Id = x.Id,
-            DoctorId = x.DoctorId,
-            PatientId = x.PatientId,
-            Rating = x.Rating,
-            Comment = x.Comment,
-            CreatedAt = x.CreatedAt
-        });
+            Id = Guid.NewGuid(),
+            DoctorId = doctorId,
+            AppointmentId = appointmentId,
+            PatientId = patientId,
+            PatientFirstName = patientFirstName,
+            PatientLastName = patientLastName,
+            Rating = request.Rating,
+            Comment = request.Comment,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _dbContext.AddAsync(review);
+        await _dbContext.SaveChangesAsync();
+
+        return MapReviewToDto(review);
+    }
+
+    public async Task<DoctorReviewDto> UpdateReviewAsync(Guid reviewId, string patientId, UpdateReviewRequest request)
+    {
+        var review = await _dbContext.Set<DoctorReview>()
+            .FirstOrDefaultAsync(x => x.Id == reviewId);
+
+        if (review == null)
+            throw new Exception("Review not found");
+
+        if (review.PatientId != patientId)
+            throw new Exception("You are not authorized to edit this review");
+
+        if (DateTime.UtcNow > review.CreatedAt.AddHours(24))
+            throw new Exception("Reviews can only be edited within 24 hours of publication");
+
+        review.Rating = request.Rating;
+        review.Comment = request.Comment;
+        review.UpdatedAt = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        return MapReviewToDto(review);
+    }
+
+    public async Task<DoctorReviewDto?> GetReviewByAppointmentAsync(Guid appointmentId)
+    {
+        var review = await _dbContext.Set<DoctorReview>()
+            .FirstOrDefaultAsync(x => x.AppointmentId == appointmentId);
+
+        return review == null ? null : MapReviewToDto(review);
     }
 
     public async Task<DoctorAvailabilityDto> AddAvailabilityAsync(string userId, CreateAvailabilityRequest request)
@@ -215,7 +288,7 @@ public class DoctorService : IDoctorService
         await _dbContext.SaveChangesAsync();
     }
 
-    private static DoctorProfileDto MapToDto(DoctorProfile profile)
+    private static DoctorProfileDto MapToDto(DoctorProfile profile, List<DoctorReview> reviews)
     {
         return new DoctorProfileDto
         {
@@ -227,7 +300,26 @@ public class DoctorService : IDoctorService
             ConsultationFee = profile.ConsultationFee,
             PhoneNumber = profile.PhoneNumber,
             MedicalInstitutionLicense = profile.MedicalInstitutionLicense,
-            Biography = profile.Biography
+            Biography = profile.Biography,
+            AverageRating = reviews.Count > 0 ? Math.Round(reviews.Average(r => r.Rating), 2) : 0,
+            ReviewCount = reviews.Count
+        };
+    }
+
+    private static DoctorReviewDto MapReviewToDto(DoctorReview review)
+    {
+        return new DoctorReviewDto
+        {
+            Id = review.Id,
+            DoctorId = review.DoctorId,
+            AppointmentId = review.AppointmentId,
+            PatientId = review.PatientId,
+            PatientFirstName = review.PatientFirstName,
+            PatientLastName = review.PatientLastName,
+            Rating = review.Rating,
+            Comment = review.Comment,
+            CreatedAt = review.CreatedAt,
+            UpdatedAt = review.UpdatedAt
         };
     }
 }

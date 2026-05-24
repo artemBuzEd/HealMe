@@ -11,6 +11,9 @@ public interface IDoctorService
     Task<DoctorProfileDto?> GetDoctorByIdAsync(Guid id);
     Task<IEnumerable<DoctorAvailabilityDto>> GetAvailabilityAsync(Guid doctorId);
     Task<IEnumerable<DoctorReviewDto>> GetReviewsAsync(Guid doctorId);
+    Task<DoctorReviewDto> CreateReviewAsync(Guid appointmentId, Guid doctorId, string patientId, string patientFirstName, string patientLastName, CreateReviewRequest request);
+    Task<DoctorReviewDto> UpdateReviewAsync(Guid reviewId, string patientId, UpdateReviewRequest request);
+    Task<DoctorReviewDto?> GetReviewByAppointmentAsync(Guid appointmentId);
     Task<DoctorAvailabilityDto> AddAvailabilityAsync(string userId, CreateAvailabilityRequest request);
     Task<DoctorAvailabilityDto> UpdateAvailabilityAsync(string userId, Guid availabilityId, UpdateAvailabilityRequest request);
     Task DeleteAvailabilityAsync(string userId, Guid availabilityId);

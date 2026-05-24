@@ -151,6 +151,29 @@ public class AppointmentService : IAppointmentService
         return appointment;
     }
 
+    public async Task<AppointmentDto> CompleteAppointmentAsync(string doctorUserId, Guid appointmentId)
+    {
+        var doctor = await _doctorService.GetProfileAsync(doctorUserId);
+        if (doctor == null) throw new Exception("Doctor profile not found");
+
+        var appointment = await _dbContext.Set<Appointment>()
+            .FirstOrDefaultAsync(x => x.Id == appointmentId);
+
+        if (appointment == null) throw new Exception("Appointment not found");
+        if (appointment.DoctorId != doctor.Id) throw new Exception("Appointment does not belong to this doctor");
+
+        if (appointment.Status != AppointmentStatus.Confirmed)
+            throw new Exception("Only confirmed appointments can be completed");
+
+        if (appointment.EndTime > DateTime.UtcNow)
+            throw new Exception("Cannot complete an appointment before its end time");
+
+        appointment.Status = AppointmentStatus.Completed;
+        await _dbContext.SaveChangesAsync();
+
+        return MapToDto(appointment);
+    }
+
     private static AppointmentDto MapToDto(Appointment appointment)
     {
         return new AppointmentDto

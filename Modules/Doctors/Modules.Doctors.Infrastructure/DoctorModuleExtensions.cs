@@ -21,6 +21,8 @@ public static class DoctorModuleExtensions
         services.AddScoped<IDoctorService, DoctorService>();
         services.AddScoped<IValidator<CreateAvailabilityRequest>, CreateAvailabilityRequestValidator>();
         services.AddScoped<IValidator<UpdateDoctorProfileRequest>, UpdateDoctorProfileRequestValidator>();
+        services.AddScoped<IValidator<CreateReviewRequest>, CreateReviewRequestValidator>();
+        services.AddScoped<IValidator<UpdateReviewRequest>, UpdateReviewRequestValidator>();
         
         
         
