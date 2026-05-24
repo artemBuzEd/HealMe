@@ -70,9 +70,13 @@ public class DoctorsController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("{id:guid}/reviews")]
-    public async Task<IActionResult> GetDoctorReviews(Guid id)
+    public async Task<IActionResult> GetDoctorReviews(Guid id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var reviews = await _doctorService.GetReviewsAsync(id);
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 1;
+        if (pageSize > 50) pageSize = 50;
+
+        var reviews = await _doctorService.GetReviewsAsync(id, page, pageSize);
         return Ok(reviews);
     }
     
