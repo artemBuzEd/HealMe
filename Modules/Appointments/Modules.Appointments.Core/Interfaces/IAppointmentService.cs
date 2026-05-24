@@ -11,4 +11,5 @@ public interface IAppointmentService
     Task CancelAppointmentAsync(string userId, Guid appointmentId);
     Task<AppointmentDto> GetAppointmentByIdAsync(Guid appointmentId);
     Task<AppointmentAuthDto> GetAppointmentAuthDetailsAsync(Guid appointmentId);
+    Task<AppointmentDto> CompleteAppointmentAsync(string doctorUserId, Guid appointmentId);
 }

@@ -13,4 +13,6 @@ public class DoctorProfileDto
     public string PhoneNumber { get; set; } = string.Empty;
     public string MedicalInstitutionLicense { get; set; } = string.Empty;
     public string? Biography { get; set; }
+    public double AverageRating { get; set; }
+    public int ReviewCount { get; set; }
 }
